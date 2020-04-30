@@ -1,0 +1,99 @@
+{
+    "name": "ysato/laravel-skeleton",
+    "description": "Generic Laravel project skeleton package",
+    "keywords": [
+        "Skeleton",
+        "laravel"
+    ],
+    "homepage": "https://github.com/ysato/Ysato.LaravelSkeleton",
+    "license": "MIT",
+    "require": {
+        "php": "^7.2",
+        "fideloper/proxy": "^4.0",
+        "laravel/framework": "^6.2",
+        "laravel/tinker": "^2.0"
+    },
+    "require-dev": {
+        "facade/ignition": "^1.4",
+        "friendsofphp/php-cs-fixer": "^2.16",
+        "fzaninotto/faker": "^1.9.1",
+        "mockery/mockery": "^1.0",
+        "nunomaduro/collision": "^3.0",
+        "phpmd/phpmd": "^2.8",
+        "phpmetrics/phpmetrics": "^2.6",
+        "phpstan/phpstan": "^0.12",
+        "phpunit/phpunit": "^8.0",
+        "roave/security-advisories": "dev-master",
+        "squizlabs/php_codesniffer": "^3.5",
+        "vimeo/psalm": "^3.11"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "dont-discover": []
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Ysato\\LaravelSkeleton\\": "src/"
+        },
+        "classmap": [
+            "database/seeds",
+            "database/factories"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "__Vendor__\\__Package__\\": [
+                "tests/",
+                "tests/Fake"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "scripts": {
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi"
+        ],
+        "post-root-package-install": [
+            "Ysato\\LaravelSkeleton\\Installer::preInstall",
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "post-create-project-cmd": [
+            "Ysato\\LaravelSkeleton\\Installer::postInstall",
+            "composer update",
+            "@php artisan key:generate --ansi"
+        ],
+        "test": [
+            "./vendor/bin/phpunit"
+        ],
+        "tests": [
+            "@cs",
+            "./vendor/bin/phpmd src,tests text ./phpmd.xml",
+            "./vendor/bin/phpstan analyse -c phpstan.neon --no-progress",
+            "./vendor/bin/psalm",
+            "@test"
+        ],
+        "coverage": [
+            "php -dzend_extension=xdebug.so ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage"
+        ],
+        "cs": [
+            "./vendor/bin/php-cs-fixer fix -v --dry-run",
+            "./vendor/bin/phpcs src"
+        ],
+        "cs-fix": [
+            "./vendor/bin/php-cs-fixer fix -v",
+            "./vendor/bin/phpcbf src"
+        ],
+        "metrics": [
+            "phpmetrics --report-html=build/metrics --excluded-dirs=src/Exception src"
+        ]
+    }
+}

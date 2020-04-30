@@ -1,0 +1,61 @@
+version: 2.1
+
+executors:
+  default:
+    docker:
+      - image: circleci/php:7.3.8-cli-stretch
+
+commands:
+  load-cache:
+    steps:
+      - restore_cache:
+          keys:
+            - v1-composer-{{ checksum "composer.lock" }}
+            - v1-composer-
+
+  save-cache:
+    steps:
+      - save_cache:
+          key: v1-composer-{{ checksum "composer.lock" }}
+          paths:
+            - vendor
+
+jobs:
+  test:
+    executor:
+      name: default
+    steps:
+      - checkout
+      - load-cache
+      - run: composer install -n --prefer-dist
+      - save-cache
+      - run:
+          name: Code coverage
+          command: ./vendor/bin/phpunit -v --coverage-html /tmp/artifacts
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  lint:
+    executor:
+      name: default
+    steps:
+      - checkout
+      - load-cache
+      - run:
+          name: Static analysis
+          command: |-
+            ./vendor/bin/phpstan analyse -l max src tests -c phpstan.neon --no-progress --no-interaction
+            ./vendor/bin/psalm --show-info=false
+      - run:
+          name: Coding standards
+          command: |-
+            ./vendor/bin/php-cs-fixer --dry-run -v fix
+            ./vendor/bin/phpcs src
+
+workflows:
+  test_lint:
+    jobs:
+      - test
+      - lint:
+          requires:
+            - test
